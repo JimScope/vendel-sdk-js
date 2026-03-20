@@ -1,8 +1,13 @@
-# Publishes to npm when a version tag is pushed.
+# Publishes to npm using Trusted Publishers (OIDC). No token needed.
 #
 # Setup:
-#   1. Create an npm access token at https://www.npmjs.com/settings/~/tokens
-#   2. Add it as a repository secret: Settings → Secrets → NPM_TOKEN
+#   1. Publish the first version manually: npm login && npm publish --access public
+#   2. On npmjs.com, go to vendel-sdk → Settings → Trusted Publisher → GitHub Actions:
+#        - User: JimScope
+#        - Repository: vendel-sdk-js
+#        - Workflow: publish.yml
+#        - Environment: npm
+#   3. Create the "npm" environment in GitHub: Settings → Environments → New
 #
 # Usage:
 #   1. Update "version" in package.json
@@ -17,10 +22,12 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment: npm
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,13 +35,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 24
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
         run: npm install
 
       - name: Publish to npm
-        run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public
