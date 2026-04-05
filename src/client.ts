@@ -32,10 +32,14 @@ export class VendelClient {
   async sendSms(
     recipients: string[],
     body: string,
-    deviceId?: string,
+    options?: {
+      deviceId?: string;
+      groupIds?: string[];
+    },
   ): Promise<SendSMSResponse> {
     const payload: Record<string, unknown> = { recipients, body };
-    if (deviceId) payload.device_id = deviceId;
+    if (options?.deviceId) payload.device_id = options.deviceId;
+    if (options?.groupIds?.length) payload.group_ids = options.groupIds;
     return this.post<SendSMSResponse>("/api/sms/send", payload);
   }
 
@@ -46,21 +50,24 @@ export class VendelClient {
    *
    * @param recipients - Phone numbers in E.164 format (e.g. `+1234567890`).
    * @param templateId - ID of the saved template.
-   * @param variables - Values for custom template variables (e.g. `{ code: "1234" }`).
-   * @param deviceId - Optional device to route through.
+   * @param options - Optional variables, device, and group settings.
    */
   async sendSmsTemplate(
     recipients: string[],
     templateId: string,
-    variables?: Record<string, string>,
-    deviceId?: string,
+    options?: {
+      variables?: Record<string, string>;
+      deviceId?: string;
+      groupIds?: string[];
+    },
   ): Promise<SendSMSResponse> {
     const payload: SendSMSTemplateRequest = {
       recipients,
       template_id: templateId,
     };
-    if (variables) payload.variables = variables;
-    if (deviceId) payload.device_id = deviceId;
+    if (options?.variables) payload.variables = options.variables;
+    if (options?.deviceId) payload.device_id = options.deviceId;
+    if (options?.groupIds?.length) payload.group_ids = options.groupIds;
     return this.post<SendSMSResponse>("/api/sms/send-template", payload);
   }
 

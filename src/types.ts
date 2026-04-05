@@ -2,6 +2,7 @@ export interface SendSMSRequest {
   recipients: string[];
   body: string;
   device_id?: string;
+  group_ids?: string[];
 }
 
 export interface SendSMSTemplateRequest {
@@ -9,6 +10,7 @@ export interface SendSMSTemplateRequest {
   template_id: string;
   variables?: Record<string, string>;
   device_id?: string;
+  group_ids?: string[];
 }
 
 export interface SendSMSResponse {
