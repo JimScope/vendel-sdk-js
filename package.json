@@ -16,6 +16,7 @@
   ],
   "scripts": {
     "build": "tsc",
+    "test": "tsc && node --test tests/*.test.mjs",
     "prepublishOnly": "tsc"
   },
   "license": "MIT",
