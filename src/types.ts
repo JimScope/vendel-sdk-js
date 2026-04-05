@@ -4,6 +4,13 @@ export interface SendSMSRequest {
   device_id?: string;
 }
 
+export interface SendSMSTemplateRequest {
+  recipients: string[];
+  template_id: string;
+  variables?: Record<string, string>;
+  device_id?: string;
+}
+
 export interface SendSMSResponse {
   batch_id: string;
   message_ids: string[];

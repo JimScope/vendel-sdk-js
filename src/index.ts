@@ -4,6 +4,7 @@ export { verifyWebhookSignature } from "./webhook.js";
 export type {
   VendelClientOptions,
   SendSMSRequest,
+  SendSMSTemplateRequest,
   SendSMSResponse,
   Quota,
 } from "./types.js";

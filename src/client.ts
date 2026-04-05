@@ -1,5 +1,10 @@
 import { VendelAPIError, VendelQuotaError } from "./errors.js";
-import type { VendelClientOptions, Quota, SendSMSResponse } from "./types.js";
+import type {
+  VendelClientOptions,
+  Quota,
+  SendSMSResponse,
+  SendSMSTemplateRequest,
+} from "./types.js";
 
 /**
  * Client for the Vendel SMS gateway API.
@@ -32,6 +37,31 @@ export class VendelClient {
     const payload: Record<string, unknown> = { recipients, body };
     if (deviceId) payload.device_id = deviceId;
     return this.post<SendSMSResponse>("/api/sms/send", payload);
+  }
+
+  /**
+   * Send an SMS using a saved template with variable interpolation.
+   *
+   * Reserved variables (`{{name}}`, `{{phone}}`) are auto-filled from contacts.
+   *
+   * @param recipients - Phone numbers in E.164 format (e.g. `+1234567890`).
+   * @param templateId - ID of the saved template.
+   * @param variables - Values for custom template variables (e.g. `{ code: "1234" }`).
+   * @param deviceId - Optional device to route through.
+   */
+  async sendSmsTemplate(
+    recipients: string[],
+    templateId: string,
+    variables?: Record<string, string>,
+    deviceId?: string,
+  ): Promise<SendSMSResponse> {
+    const payload: SendSMSTemplateRequest = {
+      recipients,
+      template_id: templateId,
+    };
+    if (variables) payload.variables = variables;
+    if (deviceId) payload.device_id = deviceId;
+    return this.post<SendSMSResponse>("/api/sms/send-template", payload);
   }
 
   /** Get the current quota for the authenticated user. */
