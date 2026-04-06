@@ -4,6 +4,11 @@ import type {
   Quota,
   SendSMSResponse,
   SendSMSTemplateRequest,
+  MessageStatus,
+  BatchStatus,
+  Contact,
+  ContactGroup,
+  PaginatedResponse,
 } from "./types.js";
 
 /**
@@ -74,6 +79,44 @@ export class VendelClient {
   /** Get the current quota for the authenticated user. */
   async getQuota(): Promise<Quota> {
     return this.get<Quota>("/api/plans/quota");
+  }
+
+  /** Get the status of a single SMS message. */
+  async getMessageStatus(messageId: string): Promise<MessageStatus> {
+    return this.get<MessageStatus>(`/api/sms/status/${messageId}`);
+  }
+
+  /** Get the status of all messages in a batch. */
+  async getBatchStatus(batchId: string): Promise<BatchStatus> {
+    return this.get<BatchStatus>(`/api/sms/batch/${batchId}`);
+  }
+
+  /** List contacts with optional search and group filter. */
+  async listContacts(options?: {
+    page?: number;
+    perPage?: number;
+    search?: string;
+    groupId?: string;
+  }): Promise<PaginatedResponse<Contact>> {
+    const params = new URLSearchParams();
+    if (options?.page) params.set("page", String(options.page));
+    if (options?.perPage) params.set("per_page", String(options.perPage));
+    if (options?.search) params.set("search", options.search);
+    if (options?.groupId) params.set("group_id", options.groupId);
+    const query = params.toString();
+    return this.get<PaginatedResponse<Contact>>(`/api/contacts${query ? `?${query}` : ""}`);
+  }
+
+  /** List contact groups. */
+  async listContactGroups(options?: {
+    page?: number;
+    perPage?: number;
+  }): Promise<PaginatedResponse<ContactGroup>> {
+    const params = new URLSearchParams();
+    if (options?.page) params.set("page", String(options.page));
+    if (options?.perPage) params.set("per_page", String(options.perPage));
+    const query = params.toString();
+    return this.get<PaginatedResponse<ContactGroup>>(`/api/contacts/groups${query ? `?${query}` : ""}`);
   }
 
   // ------------------------------------------------------------------

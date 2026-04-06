@@ -7,4 +7,9 @@ export type {
   SendSMSTemplateRequest,
   SendSMSResponse,
   Quota,
+  MessageStatus,
+  BatchStatus,
+  Contact,
+  ContactGroup,
+  PaginatedResponse,
 } from "./types.js";
