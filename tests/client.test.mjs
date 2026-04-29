@@ -99,6 +99,137 @@ describe("getQuota", () => {
   });
 });
 
+describe("listDevices", () => {
+  it("calls /api/devices with no query when no opts", async () => {
+    mockFetch(200, { items: [], page: 1, per_page: 50, total_items: 0, total_pages: 0 });
+    const client = newClient();
+    await client.listDevices();
+    assert.equal(fetchCalls[0].url, "https://api.test.com/api/devices");
+    assert.equal(fetchCalls[0].opts.headers["X-API-Key"], "vk_test");
+  });
+
+  it("maps camelCase opts to snake_case query params", async () => {
+    mockFetch(200, { items: [], page: 2, per_page: 10, total_items: 0, total_pages: 0 });
+    const client = newClient();
+    await client.listDevices({ page: 2, perPage: 10, deviceType: "android" });
+    const url = new URL(fetchCalls[0].url);
+    assert.equal(url.pathname, "/api/devices");
+    assert.equal(url.searchParams.get("page"), "2");
+    assert.equal(url.searchParams.get("per_page"), "10");
+    assert.equal(url.searchParams.get("device_type"), "android");
+    assert.equal(url.searchParams.get("perPage"), null);
+    assert.equal(url.searchParams.get("deviceType"), null);
+  });
+
+  it("drops undefined params", async () => {
+    mockFetch(200, { items: [], page: 1, per_page: 50, total_items: 0, total_pages: 0 });
+    const client = newClient();
+    await client.listDevices({ page: 1, perPage: undefined, deviceType: undefined });
+    const url = new URL(fetchCalls[0].url);
+    assert.equal(url.searchParams.get("page"), "1");
+    assert.equal(url.searchParams.has("per_page"), false);
+    assert.equal(url.searchParams.has("device_type"), false);
+  });
+
+  it("returns paginated devices", async () => {
+    mockFetch(200, {
+      items: [
+        { id: "d1", name: "Pixel", device_type: "android", phone_number: "+1", created: "c", updated: "u" },
+      ],
+      page: 1,
+      per_page: 50,
+      total_items: 1,
+      total_pages: 1,
+    });
+    const client = newClient();
+    const resp = await client.listDevices();
+    assert.equal(resp.items.length, 1);
+    assert.equal(resp.items[0].device_type, "android");
+    assert.equal(resp.total_items, 1);
+  });
+});
+
+describe("listMessages", () => {
+  it("calls /api/sms/messages with no query when no opts", async () => {
+    mockFetch(200, { items: [], page: 1, per_page: 50, total_items: 0, total_pages: 0 });
+    const client = newClient();
+    await client.listMessages();
+    assert.equal(fetchCalls[0].url, "https://api.test.com/api/sms/messages");
+  });
+
+  it("maps camelCase opts to snake_case query params", async () => {
+    mockFetch(200, { items: [], page: 1, per_page: 25, total_items: 0, total_pages: 0 });
+    const client = newClient();
+    await client.listMessages({
+      page: 3,
+      perPage: 25,
+      status: "delivered",
+      deviceId: "dev_1",
+      batchId: "b_1",
+      recipient: "+15550000",
+      from: "2026-04-01T00:00:00Z",
+      to: "2026-04-29T23:59:59Z",
+    });
+    const url = new URL(fetchCalls[0].url);
+    assert.equal(url.pathname, "/api/sms/messages");
+    assert.equal(url.searchParams.get("page"), "3");
+    assert.equal(url.searchParams.get("per_page"), "25");
+    assert.equal(url.searchParams.get("status"), "delivered");
+    assert.equal(url.searchParams.get("device_id"), "dev_1");
+    assert.equal(url.searchParams.get("batch_id"), "b_1");
+    assert.equal(url.searchParams.get("recipient"), "+15550000");
+    assert.equal(url.searchParams.get("from"), "2026-04-01T00:00:00Z");
+    assert.equal(url.searchParams.get("to"), "2026-04-29T23:59:59Z");
+    assert.equal(url.searchParams.get("perPage"), null);
+    assert.equal(url.searchParams.get("deviceId"), null);
+    assert.equal(url.searchParams.get("batchId"), null);
+  });
+
+  it("drops undefined params", async () => {
+    mockFetch(200, { items: [], page: 1, per_page: 50, total_items: 0, total_pages: 0 });
+    const client = newClient();
+    await client.listMessages({ status: "queued", deviceId: undefined, batchId: undefined });
+    const url = new URL(fetchCalls[0].url);
+    assert.equal(url.searchParams.get("status"), "queued");
+    assert.equal(url.searchParams.has("device_id"), false);
+    assert.equal(url.searchParams.has("batch_id"), false);
+    assert.equal(url.searchParams.has("recipient"), false);
+    assert.equal(url.searchParams.has("from"), false);
+    assert.equal(url.searchParams.has("to"), false);
+  });
+
+  it("returns paginated messages with new fields", async () => {
+    mockFetch(200, {
+      items: [
+        {
+          id: "m1",
+          batch_id: "b1",
+          recipient: "+1",
+          from_number: "+9",
+          body: "hi",
+          status: "delivered",
+          message_type: "sms",
+          error_message: "",
+          device_id: "d1",
+          sent_at: "2026-04-29T10:00:00Z",
+          delivered_at: "2026-04-29T10:00:01Z",
+          created: "c",
+          updated: "u",
+        },
+      ],
+      page: 1,
+      per_page: 50,
+      total_items: 1,
+      total_pages: 1,
+    });
+    const client = newClient();
+    const resp = await client.listMessages();
+    assert.equal(resp.items[0].from_number, "+9");
+    assert.equal(resp.items[0].message_type, "sms");
+    assert.equal(resp.items[0].sent_at, "2026-04-29T10:00:00Z");
+  });
+});
+
 describe("error handling", () => {
   it("throws VendelAPIError on 400", async () => {
     mockFetch(400, { message: "Bad request" });

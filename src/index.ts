@@ -11,5 +11,6 @@ export type {
   BatchStatus,
   Contact,
   ContactGroup,
+  Device,
   PaginatedResponse,
 } from "./types.js";

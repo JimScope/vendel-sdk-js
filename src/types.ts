@@ -33,9 +33,23 @@ export interface MessageStatus {
   id: string;
   batch_id: string;
   recipient: string;
+  from_number?: string;
+  body?: string;
   status: string;
+  message_type?: string;
   error_message: string;
   device_id: string;
+  sent_at?: string;
+  delivered_at?: string;
+  created: string;
+  updated: string;
+}
+
+export interface Device {
+  id: string;
+  name: string;
+  device_type: string;
+  phone_number: string;
   created: string;
   updated: string;
 }

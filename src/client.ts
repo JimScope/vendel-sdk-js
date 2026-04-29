@@ -8,6 +8,7 @@ import type {
   BatchStatus,
   Contact,
   ContactGroup,
+  Device,
   PaginatedResponse,
 } from "./types.js";
 
@@ -117,6 +118,48 @@ export class VendelClient {
     if (options?.perPage) params.set("per_page", String(options.perPage));
     const query = params.toString();
     return this.get<PaginatedResponse<ContactGroup>>(`/api/contacts/groups${query ? `?${query}` : ""}`);
+  }
+
+  /** List devices registered to the authenticated user. */
+  async listDevices(
+    options: {
+      page?: number;
+      perPage?: number;
+      deviceType?: string;
+    } = {},
+  ): Promise<PaginatedResponse<Device>> {
+    const params = new URLSearchParams();
+    if (options.page !== undefined) params.set("page", String(options.page));
+    if (options.perPage !== undefined) params.set("per_page", String(options.perPage));
+    if (options.deviceType !== undefined) params.set("device_type", options.deviceType);
+    const query = params.toString();
+    return this.get<PaginatedResponse<Device>>(`/api/devices${query ? `?${query}` : ""}`);
+  }
+
+  /** List SMS messages with optional filters. `from`/`to` accept ISO8601 timestamps. */
+  async listMessages(
+    options: {
+      page?: number;
+      perPage?: number;
+      status?: string;
+      deviceId?: string;
+      batchId?: string;
+      recipient?: string;
+      from?: string;
+      to?: string;
+    } = {},
+  ): Promise<PaginatedResponse<MessageStatus>> {
+    const params = new URLSearchParams();
+    if (options.page !== undefined) params.set("page", String(options.page));
+    if (options.perPage !== undefined) params.set("per_page", String(options.perPage));
+    if (options.status !== undefined) params.set("status", options.status);
+    if (options.deviceId !== undefined) params.set("device_id", options.deviceId);
+    if (options.batchId !== undefined) params.set("batch_id", options.batchId);
+    if (options.recipient !== undefined) params.set("recipient", options.recipient);
+    if (options.from !== undefined) params.set("from", options.from);
+    if (options.to !== undefined) params.set("to", options.to);
+    const query = params.toString();
+    return this.get<PaginatedResponse<MessageStatus>>(`/api/sms/messages${query ? `?${query}` : ""}`);
   }
 
   // ------------------------------------------------------------------
