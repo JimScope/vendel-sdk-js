@@ -26,10 +26,10 @@
   },
   "homepage": "https://vendel.cc/docs/api/sdks",
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.5.0"
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
   }
 }
